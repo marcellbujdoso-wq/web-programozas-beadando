@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS CRUD - Napfény Tours</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: #f4f4f9; }
+        header { background-color: #005f73; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #0a9396; padding: 10px; text-align: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        footer { background-color: #001219; color: white; text-align: center; padding: 10px; margin-top: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #005f73; color: white; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 8px; margin: 5px; width: calc(45% - 20px); border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; background-color: #0a9396; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background-color: #005f73; }
+        .btn-edit { background-color: #e9c46a; color: black; margin-right: 5px; padding: 5px 10px; }
+        .btn-delete { background-color: #e76f51; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Web programozás-1 Előadás Házi feladat</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Főoldal</a>
+        <a href="javascript.html">JS CRUD</a>
+        <a href="react.html">React CRUD</a>
+        <a href="spa.html">SPA (Játékok)</a>
+        <a href="fetchapi.html">Fetch API</a>
+        <a href="axios.html">Axios</a>
+        <a href="oojs.html">OOJS</a>
+    </nav>
+
+    <main>
+        <h2>Városok Kezelése (JavaScript CRUD)</h2>
+
+        <div class="form-container">
+            <h3 id="formTitle">Új város hozzáadása</h3>
+            <input type="hidden" id="editId">
+            <input type="text" id="nevInput" placeholder="Város neve (pl. Sousse)">
+            <input type="text" id="orszagInput" placeholder="Ország (pl. Tunézia)">
+            <button onclick="saveItem()" id="saveBtn">Hozzáadás</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Azonosító</th>
+                    <th>Város neve</th>
+                    <th>Ország</th>
+                    <th>Műveletek</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <p>Készítette: Marcell (Neptun: IDE_IRD_A_TIED) és Luca (Neptun: IDE_IRD_AZ_OVEVET)</p>
+    </footer>
+
+    <script>
+        let helysegek = [
+            { id: 1, nev: 'Sousse', orszag: 'Tunézia' },
+            { id: 2, nev: 'Djerba', orszag: 'Tunézia' },
+            { id: 3, nev: 'Sharm El Sheikh', orszag: 'Egyiptom' },
+            { id: 4, nev: 'Hurghada', orszag: 'Egyiptom' }
+        ];
+
+        let maxId = 4;
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            helysegek.forEach(helyseg => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${helyseg.id}</td>
+                    <td>${helyseg.nev}</td>
+                    <td>${helyseg.orszag}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editItem(${helyseg.id})">Szerkesztés</button>
+                        <button class="btn-delete" onclick="deleteItem(${helyseg.id})">Törlés</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveItem() {
+            const idInput = document.getElementById('editId').value;
+            const nevInput = document.getElementById('nevInput').value;
+            const orszagInput = document.getElementById('orszagInput').value;
+
+            if (nevInput.trim() === '' || orszagInput.trim() === '') {
+                alert('Kérlek tölts ki minden mezőt!');
+                return;
+            }
+
+            if (idInput === '') {
+                maxId++;
+                helysegek.push({ id: maxId, nev: nevInput, orszag: orszagInput });
+            } else {
+                const index = helysegek.findIndex(h => h.id == idInput);
+                if (index !== -1) {
+                    helysegek[index].nev = nevInput;
+                    helysegek[index].orszag = orszagInput;
+                }
+                
+                document.getElementById('editId').value = '';
+                document.getElementById('formTitle').innerText = 'Új város hozzáadása';
+                document.getElementById('saveBtn').innerText = 'Hozzáadás';
+            }
+
+            document.getElementById('nevInput').value = '';
+            document.getElementById('orszagInput').value = '';
+            renderTable();
+        }
+
+        function editItem(id) {
+            const helyseg = helysegek.find(h => h.id === id);
+            if (helyseg) {
+                document.getElementById('editId').value = helyseg.id;
+                document.getElementById('nevInput').value = helyseg.nev;
+                document.getElementById('orszagInput').value = helyseg.orszag;
+                
+                document.getElementById('formTitle').innerText = 'Város szerkesztése';
+                document.getElementById('saveBtn').innerText = 'Módosítás mentése';
+            }
+        }
+
+        function deleteItem(id) {
+            if (confirm('Biztosan törölni szeretnéd ezt a várost?')) {
+                helysegek = helysegek.filter(h => h.id !== id);
+                renderTable();
+            }
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
