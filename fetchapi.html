@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API CRUD - Napfény Tours</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: #f4f4f9; }
+        header { background-color: #005f73; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #0a9396; padding: 10px; text-align: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        footer { background-color: #001219; color: white; text-align: center; padding: 10px; margin-top: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #005f73; color: white; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 8px; margin: 5px; width: calc(23% - 20px); border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; background-color: #0a9396; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background-color: #005f73; }
+        .btn-edit { background-color: #e9c46a; color: black; margin-right: 5px; padding: 5px 10px; }
+        .btn-delete { background-color: #e76f51; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Web programozás-1 Előadás Házi feladat</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Főoldal</a>
+        <a href="javascript.html">JS CRUD</a>
+        <a href="react.html">React CRUD</a>
+        <a href="spa.html">SPA (Játékok)</a>
+        <a href="fetchapi.html">Fetch API</a>
+        <a href="axios.html">Axios</a>
+        <a href="oojs.html">OOJS</a>
+    </nav>
+
+    <main>
+        <h2>Tavaszi Ajánlatok (Fetch API CRUD)</h2>
+
+        <div class="form-container">
+            <h3 id="formTitle">Új ajánlat hozzáadása</h3>
+            <input type="hidden" id="editId">
+            <input type="text" id="szallodaInput" placeholder="Szálloda (pl. BS)">
+            <input type="text" id="indulasInput" placeholder="Indulás (pl. 2011.01.05)">
+            <input type="number" id="idotartamInput" placeholder="Időtartam (nap)">
+            <input type="number" id="arInput" placeholder="Ár (Ft)">
+            <button onclick="saveItem()" id="saveBtn">Hozzáadás</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Szálloda az.</th>
+                    <th>Indulás</th>
+                    <th>Időtartam</th>
+                    <th>Ár</th>
+                    <th>Műveletek</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <p>Készítette: Marcell (Neptun: E364NV) és Luca (Neptun: FLVPP9)</p>
+    </footer>
+
+    <script>
+        const apiUrl = 'http://localhost/web-programozas-beadando/api.php';
+
+        async function fetchAdatok() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Hiba az adatok lekérésekor:', error);
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.szalloda_az}</td>
+                    <td>${item.indulas}</td>
+                    <td>${item.idotartam}</td>
+                    <td>${item.ar} Ft</td>
+                    <td>
+                        <button class="btn-edit" onclick="editItem(${item.id}, '${item.szalloda_az}', '${item.indulas}', ${item.idotartam}, ${item.ar})">Szerkesztés</button>
+                        <button class="btn-delete" onclick="deleteItem(${item.id})">Törlés</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function saveItem() {
+            const id = document.getElementById('editId').value;
+            const szalloda_az = document.getElementById('szallodaInput').value;
+            const indulas = document.getElementById('indulasInput').value;
+            const idotartam = document.getElementById('idotartamInput').value;
+            const ar = document.getElementById('arInput').value;
+
+            if (!szalloda_az || !indulas || !idotartam || !ar) {
+                alert('Minden mezőt ki kell tölteni!');
+                return;
+            }
+
+            const payload = { szalloda_az, indulas, idotartam, ar };
+
+            try {
+                if (id) {
+                    payload.id = id;
+                    await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                document.getElementById('editId').value = '';
+                document.getElementById('szallodaInput').value = '';
+                document.getElementById('indulasInput').value = '';
+                document.getElementById('idotartamInput').value = '';
+                document.getElementById('arInput').value = '';
+                document.getElementById('formTitle').innerText = 'Új ajánlat hozzáadása';
+                document.getElementById('saveBtn').innerText = 'Hozzáadás';
+
+                fetchAdatok();
+            } catch (error) {
+                console.error('Hiba a mentés során:', error);
+            }
+        }
+
+        function editItem(id, szalloda_az, indulas, idotartam, ar) {
+            document.getElementById('editId').value = id;
+            document.getElementById('szallodaInput').value = szalloda_az;
+            document.getElementById('indulasInput').value = indulas;
+            document.getElementById('idotartamInput').value = idotartam;
+            document.getElementById('arInput').value = ar;
+            
+            document.getElementById('formTitle').innerText = 'Ajánlat szerkesztése';
+            document.getElementById('saveBtn').innerText = 'Módosítás mentése';
+        }
+
+        async function deleteItem(id) {
+            if (confirm('Biztosan törölni szeretnéd ezt az ajánlatot?')) {
+                try {
+                    await fetch(`${apiUrl}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    fetchAdatok();
+                } catch (error) {
+                    console.error('Hiba a törlés során:', error);
+                }
+            }
+        }
+
+        fetchAdatok();
+    </script>
+</body>
+</html>
