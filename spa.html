@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA Játékok - Napfény Tours</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: #f4f4f9; }
+        header { background-color: #005f73; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #0a9396; padding: 10px; text-align: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; text-align: center; }
+        footer { background-color: #001219; color: white; text-align: center; padding: 10px; margin-top: auto; }
+        .spa-nav button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; background-color: #e9c46a; border: none; border-radius: 5px; font-weight: bold; }
+        .spa-nav button:hover { background-color: #f4a261; }
+        .game-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        .game-btn { padding: 10px; margin: 5px; font-size: 16px; cursor: pointer; background-color: #2a9d8f; color: white; border: none; border-radius: 4px; }
+        .game-btn:hover { background-color: #264653; }
+        input[type="number"] { padding: 10px; font-size: 16px; margin-right: 10px; width: 100px; }
+    </style>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Web programozás-1 Előadás Házi feladat</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Főoldal</a>
+        <a href="javascript.html">JS CRUD</a>
+        <a href="react.html">React CRUD</a>
+        <a href="spa.html">SPA (Játékok)</a>
+        <a href="fetchapi.html">Fetch API</a>
+        <a href="axios.html">Axios</a>
+        <a href="oojs.html">OOJS</a>
+    </nav>
+
+    <main id="root"></main>
+
+    <footer>
+        <p>Készítette: Marcell (Neptun: E364NV) és Luca (Neptun: FLVPP9)</p>
+    </footer>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function RockPaperScissors() {
+            const [userChoice, setUserChoice] = useState(null);
+            const [computerChoice, setComputerChoice] = useState(null);
+            const [result, setResult] = useState('');
+
+            const choices = ['Kő', 'Papír', 'Olló'];
+
+            const playGame = (choice) => {
+                const randomChoice = choices[Math.floor(Math.random() * choices.length)];
+                setUserChoice(choice);
+                setComputerChoice(randomChoice);
+
+                if (choice === randomChoice) {
+                    setResult('Döntetlen!');
+                } else if (
+                    (choice === 'Kő' && randomChoice === 'Olló') ||
+                    (choice === 'Papír' && randomChoice === 'Kő') ||
+                    (choice === 'Olló' && randomChoice === 'Papír')
+                ) {
+                    setResult('Nyertél!');
+                } else {
+                    setResult('Vesztettél!');
+                }
+            };
+
+            return (
+                <div className="game-container">
+                    <h2>Kő-Papír-Olló</h2>
+                    <div>
+                        {choices.map(choice => (
+                            <button key={choice} className="game-btn" onClick={() => playGame(choice)}>{choice}</button>
+                        ))}
+                    </div>
+                    {userChoice && (
+                        <div style={{ marginTop: '20px' }}>
+                            <p>Te választásod: <strong>{userChoice}</strong></p>
+                            <p>Gép választása: <strong>{computerChoice}</strong></p>
+                            <h3>Eredmény: {result}</h3>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function NumberGuesser() {
+            const [target, setTarget] = useState(Math.floor(Math.random() * 100) + 1);
+            const [guess, setGuess] = useState('');
+            const [message, setMessage] = useState('');
+            const [attempts, setAttempts] = useState(0);
+
+            const handleGuess = () => {
+                const num = parseInt(guess);
+                setAttempts(attempts + 1);
+
+                if (isNaN(num)) {
+                    setMessage('Kérlek adj meg egy érvényes számot!');
+                } else if (num < target) {
+                    setMessage('Nagyobb számra gondoltam.');
+                } else if (num > target) {
+                    setMessage('Kisebb számra gondoltam.');
+                } else {
+                    setMessage(`Gratulálok! Eltaláltad ${attempts + 1} próbálkozásból!`);
+                }
+            };
+
+            const resetGame = () => {
+                setTarget(Math.floor(Math.random() * 100) + 1);
+                setGuess('');
+                setMessage('');
+                setAttempts(0);
+            };
+
+            return (
+                <div className="game-container">
+                    <h2>Számkitaláló (1-100)</h2>
+                    <p>{message}</p>
+                    <input 
+                        type="number" 
+                        value={guess} 
+                        onChange={(e) => setGuess(e.target.value)} 
+                        placeholder="Tipped"
+                    />
+                    <button className="game-btn" onClick={handleGuess}>Tippelek</button>
+                    <button className="game-btn" onClick={resetGame} style={{ backgroundColor: '#e76f51' }}>Új játék</button>
+                    <p>Próbálkozások száma: {attempts}</p>
+                </div>
+            );
+        }
+
+        function App() {
+            const [activeApp, setActiveApp] = useState('rps');
+
+            return (
+                <div>
+                    <div className="spa-nav">
+                        <button onClick={() => setActiveApp('rps')}>Kő-Papír-Olló</button>
+                        <button onClick={() => setActiveApp('guesser')}>Számkitaláló</button>
+                    </div>
+                    
+                    {activeApp === 'rps' && <RockPaperScissors />}
+                    {activeApp === 'guesser' && <NumberGuesser />}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
