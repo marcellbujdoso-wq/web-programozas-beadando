@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axios CRUD - Napfény Tours</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: #f4f4f9; }
+        header { background-color: #005f73; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #0a9396; padding: 10px; text-align: center; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        footer { background-color: #001219; color: white; text-align: center; padding: 10px; margin-top: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #005f73; color: white; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 8px; margin: 5px; width: calc(23% - 20px); border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; background-color: #0a9396; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin: 5px; }
+        button:hover { background-color: #005f73; }
+        .btn-edit { background-color: #e9c46a; color: black; padding: 5px 10px; }
+        .btn-delete { background-color: #e76f51; padding: 5px 10px; }
+    </style>
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Web programozás-1 Előadás Házi feladat</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Főoldal</a>
+        <a href="javascript.html">JS CRUD</a>
+        <a href="react.html">React CRUD</a>
+        <a href="spa.html">SPA (Játékok)</a>
+        <a href="fetchapi.html">Fetch API</a>
+        <a href="axios.html">Axios</a>
+        <a href="oojs.html">OOJS</a>
+    </nav>
+
+    <main id="root"></main>
+
+    <footer>
+        <p>Készítette: Marcell (Neptun: E364NV) és Luca (Neptun: FLVPP9)</p>
+    </footer>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const apiUrl = 'http://localhost/web-programozas-beadando/api.php';
+
+        function App() {
+            const [adatok, setAdatok] = useState([]);
+            const [formData, setFormData] = useState({ id: '', szalloda_az: '', indulas: '', idotartam: '', ar: '' });
+            const [isEditing, setIsEditing] = useState(false);
+
+            useEffect(() => {
+                fetchAdatok();
+            }, []);
+
+            const fetchAdatok = async () => {
+                try {
+                    const response = await axios.get(apiUrl);
+                    setAdatok(response.data);
+                } catch (error) {
+                    console.error("Hiba az adatok lekérésekor:", error);
+                }
+            };
+
+            const handleChange = (e) => {
+                setFormData({ ...formData, [e.target.name]: e.target.value });
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!formData.szalloda_az || !formData.indulas || !formData.idotartam || !formData.ar) {
+                    alert('Minden mezőt ki kell tölteni!');
+                    return;
+                }
+
+                try {
+                    if (isEditing) {
+                        await axios.put(apiUrl, formData);
+                        setIsEditing(false);
+                    } else {
+                        await axios.post(apiUrl, formData);
+                    }
+                    setFormData({ id: '', szalloda_az: '', indulas: '', idotartam: '', ar: '' });
+                    fetchAdatok();
+                } catch (error) {
+                    console.error("Hiba a mentés során:", error);
+                }
+            };
+
+            const handleEdit = (item) => {
+                setFormData(item);
+                setIsEditing(true);
+            };
+
+            const handleDelete = async (id) => {
+                if (window.confirm('Biztosan törlöd?')) {
+                    try {
+                        await axios.delete(`${apiUrl}?id=${id}`);
+                        fetchAdatok();
+                    } catch (error) {
+                        console.error("Hiba a törlés során:", error);
+                    }
+                }
+            };
+
+            return (
+                <div>
+                    <h2>Tavaszi Ajánlatok (React + Axios CRUD)</h2>
+                    
+                    <div className="form-container">
+                        <h3>{isEditing ? 'Ajánlat szerkesztése' : 'Új ajánlat hozzáadása'}</h3>
+                        <form onSubmit={handleSubmit}>
+                            <input type="text" name="szalloda_az" value={formData.szalloda_az} onChange={handleChange} placeholder="Szálloda (pl. BS)" />
+                            <input type="text" name="indulas" value={formData.indulas} onChange={handleChange} placeholder="Indulás" />
+                            <input type="number" name="idotartam" value={formData.idotartam} onChange={handleChange} placeholder="Időtartam (nap)" />
+                            <input type="number" name="ar" value={formData.ar} onChange={handleChange} placeholder="Ár (Ft)" />
+                            <button type="submit">{isEditing ? 'Módosítás' : 'Hozzáadás'}</button>
+                            {isEditing && (
+                                <button type="button" onClick={() => { setIsEditing(false); setFormData({ id: '', szalloda_az: '', indulas: '', idotartam: '', ar: '' }); }}>
+                                    Mégsem
+                                </button>
+                            )}
+                        </form>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Szálloda az.</th>
+                                <th>Indulás</th>
+                                <th>Időtartam</th>
+                                <th>Ár</th>
+                                <th>Műveletek</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {adatok.map(item => (
+                                <tr key={item.id}>
+                                    <td>{item.id}</td>
+                                    <td>{item.szalloda_az}</td>
+                                    <td>{item.indulas}</td>
+                                    <td>{item.idotartam}</td>
+                                    <td>{item.ar} Ft</td>
+                                    <td>
+                                        <button className="btn-edit" onClick={() => handleEdit(item)}>Szerkesztés</button>
+                                        <button className="btn-delete" onClick={() => handleDelete(item.id)}>Törlés</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
