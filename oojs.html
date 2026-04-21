@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOJS - Napfény Tours</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: #f4f4f9; overflow-x: hidden; }
+        header { background-color: #005f73; color: white; padding: 20px; text-align: center; position: relative; z-index: 10; }
+        nav { background-color: #0a9396; padding: 10px; text-align: center; position: relative; z-index: 10; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { flex: 1; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; text-align: center; position: relative; z-index: 10; }
+        footer { background-color: #001219; color: white; text-align: center; padding: 10px; margin-top: auto; position: relative; z-index: 10; }
+        button { padding: 15px 25px; background-color: #e9c46a; color: black; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 16px; margin-top: 20px; }
+        button:hover { background-color: #f4a261; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Web programozás-1 Előadás Házi feladat</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Főoldal</a>
+        <a href="javascript.html">JS CRUD</a>
+        <a href="react.html">React CRUD</a>
+        <a href="spa.html">SPA (Játékok)</a>
+        <a href="fetchapi.html">Fetch API</a>
+        <a href="axios.html">Axios</a>
+        <a href="oojs.html">OOJS</a>
+    </nav>
+
+    <main>
+        <h2>Objektumorientált JavaScript (OOJS)</h2>
+        <p>Kattints a gombra új, pattogó labdák létrehozásához a képernyőn!</p>
+        <button id="letrehozGomb">Új labda indítása</button>
+    </main>
+
+    <footer>
+        <p>Készítette: Marcell (Neptun: E364NV) és Luca (Neptun: FLVPP9)</p>
+    </footer>
+
+    <script>
+        class Alakzat {
+            constructor(x, y, szin) {
+                this.x = x;
+                this.y = y;
+                this.szin = szin;
+                this.elem = document.createElement('div');
+                this.elem.style.position = 'absolute';
+                this.elem.style.backgroundColor = this.szin;
+                this.elem.style.zIndex = '1';
+            }
+
+            megjelenit() {
+                document.body.appendChild(this.elem);
+            }
+        }
+
+        class Labda extends Alakzat {
+            constructor(x, y, szin, meret, sebessegX, sebessegY) {
+                super(x, y, szin);
+                this.meret = meret;
+                this.sebessegX = sebessegX;
+                this.sebessegY = sebessegY;
+                
+                this.elem.style.width = this.meret + 'px';
+                this.elem.style.height = this.meret + 'px';
+                this.elem.style.borderRadius = '50%';
+                this.elem.style.left = this.x + 'px';
+                this.elem.style.top = this.y + 'px';
+            }
+
+            mozog() {
+                this.x += this.sebessegX;
+                this.y += this.sebessegY;
+
+                if (this.x <= 0 || this.x + this.meret >= window.innerWidth) {
+                    this.sebessegX *= -1;
+                }
+                if (this.y <= 0 || this.y + this.meret >= window.innerHeight) {
+                    this.sebessegY *= -1;
+                }
+
+                this.elem.style.left = this.x + 'px';
+                this.elem.style.top = this.y + 'px';
+            }
+        }
+
+        document.getElementById('letrehozGomb').addEventListener('click', () => {
+            const szinek = ['#e76f51', '#2a9d8f', '#e9c46a', '#f4a261', '#264653'];
+            const randomSzin = szinek[Math.floor(Math.random() * szinek.length)];
+            const randomMeret = Math.floor(Math.random() * 40) + 30;
+            const startX = Math.floor(Math.random() * (window.innerWidth - 100));
+            const startY = Math.floor(Math.random() * (window.innerHeight - 100));
+            const speedX = (Math.random() * 4 + 2) * (Math.random() > 0.5 ? 1 : -1);
+            const speedY = (Math.random() * 4 + 2) * (Math.random() > 0.5 ? 1 : -1);
+
+            const ujLabda = new Labda(startX, startY, randomSzin, randomMeret, speedX, speedY);
+            ujLabda.megjelenit();
+
+            setInterval(() => {
+                ujLabda.mozog();
+            }, 20);
+        });
+    </script>
+</body>
+</html>
