@@ -4,9 +4,9 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Origin: *");
 
 $host = "localhost";
-$user = "root";
-$pass = "";
-$db = "utazas_db";
+$user = "utazasbeadando";
+$pass = "WebProgBeadandó"; 
+$db = "utazasbeadando";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
