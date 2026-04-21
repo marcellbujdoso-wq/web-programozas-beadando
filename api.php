@@ -5,7 +5,7 @@ header("Access-Control-Allow-Origin: *");
 
 $host = "localhost";
 $user = "utazasbeadando";
-$pass = "WebProgBeadandó"; 
+$pass = "WebProgBeadando2026"; 
 $db = "utazasbeadando";
 
 $conn = new mysqli($host, $user, $pass, $db);
